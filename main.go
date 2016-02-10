@@ -65,6 +65,10 @@ func main() {
 
 func Run(app *cli.App) {
 	app.Before = func(c *cli.Context) error {
+		if c.GlobalString("key") == "" {
+			log.Fatal("No aio key provided. Use --key KEY_HERE or export AIO_KEY=KEY_HERE")
+		}
+
 		if c.GlobalBool("debug") {
 			log.SetLevel(log.DebugLevel)
 			log.Debug("Debug Mode ON")		
@@ -76,7 +80,7 @@ func Run(app *cli.App) {
 
 func MainAction(c *cli.Context) {
 	log.Debug("Starting...")
-	log.Debug("using adafruit.io key ", c.String("key"))
+	log.Debug("using adafruit.io key ", c.GlobalString("key"))
 	log.Debug("Args: ", c.Args())
 
 	if len(c.Args()) == 0 {
