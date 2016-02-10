@@ -1,9 +1,8 @@
 package aio
 
 import (
-	"os"
 	"net/http"
-	"log"
+	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"fmt"
 	"bytes"
@@ -11,6 +10,8 @@ import (
 	"reflect"
 	"time"
 )
+
+var log = logrus.New()
 
 const (
  	api_url_base = "https://io.adafruit.com/api"
@@ -32,7 +33,7 @@ type Feed struct {
 
 func Feeds() []string {	
 	url := api_url_base + "/feeds"
-	log.Println("GET", url)
+	log.Debug("GET", url)
 
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("x-aio-key", GetKey())
@@ -41,18 +42,16 @@ func Feeds() []string {
 
 	// response, err := http.Get(url)
 	if err != nil {
-		log.Printf("%s", err)
-		os.Exit(1)
+		log.WithField("error", err).Fatal("Reponse error")
 	} else {
 		// close Body after everything is done
 		defer resp.Body.Close()
 		b, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Printf("%s", err)
-			os.Exit(1)
+			log.WithField("error", err).Fatal("Error reading response body")
 		}
 
-		fmt.Printf("response: %s\n", b)
+		log.Debug("response: ", string(b))
 
 		var f interface{}
 		if json.Unmarshal(b, &f) != nil {
@@ -62,18 +61,16 @@ func Feeds() []string {
 
 		// someone call Tom Hanks, we gunna cast away
 		feeds := f.([]interface {})
-		log.Println("Found", len(feeds), "feeds")
-		for _, feed_int := range feeds {
-			feed := feed_int.(map[string]interface{})
-			fmt.Printf("\t%s\n", feed["name"])
-			// delete(feed, "name")
+		log.WithField("feeds", len(feeds)).Debug("Found feeds")
+		for _, feed_iface := range feeds {
+			feed := feed_iface.(map[string]interface{})
+			log.WithField("feed", feed["name"]).Debug("Found Feed")
 			for attr := range feed {
-				fmt.Printf("\t\t%s: %s\n", attr, feed[attr])			
+				log.WithField(attr, feed[attr]).Debug("Attr")
 			} 
-			fmt.Println()
 		} 
 	}
-	return nil
+	return []string{""}
 }
 
 func UpdateFeed(feed_id string) (bool, error) {	
