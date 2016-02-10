@@ -45,13 +45,19 @@ func main() {
 			Usage: "Enable to see debug messages",
 		},
 	}
-	// app.Action = MainAction
+	app.Action = MainAction
 	app.Commands = []cli.Command {
 		{
 			Name:      "feeds",
-			Aliases:   []string{"f"},
 			Usage:     "Get Feeds",
 			Action:    FeedsAction,
+		},
+		{
+			Name:      "feed",
+			Aliases:   []string{"f"},
+			Usage:     "Get feed info",
+			Description: "feed [FEED ID|FEED NAME|FEED KEY]",
+			Action:    FeedAction,
 		},		
 		{
 			Name:      "key",
@@ -85,12 +91,47 @@ func MainAction(c *cli.Context) {
 
 	if len(c.Args()) == 0 {
 		log.Debug("No action specified")
-		fmt.Println("Please provide a subcommand. Run --help for more. ")
+		fmt.Println("Please provide a subcommand. Run --help for some examples.")
 	}
 }
 
 func KeyAction(c *cli.Context) {
 	fmt.Println(c.String("key"))
+}
+
+func FeedAction(c *cli.Context) {
+	log.Debug("Args: ", c.Args())
+	if len(c.Args()) == 0 {
+		log.Fatal("feed id missing")
+	}
+	id := c.Args().First()
+	url := api_url_base + "/feeds/" + string(id)
+	log.Debug("GET ", url)
+
+	req, _ := http.NewRequest("GET", url, nil)
+	req.Header.Set("x-aio-key", c.GlobalString("key"))
+	client := &http.Client{}
+	resp, _ := client.Do(req)
+
+	log.WithField("status", resp.Status).Debug("response.Status")
+	switch {
+	case resp.StatusCode == 404: 
+		log.Fatal("Feed not found")
+
+	case resp.StatusCode == 200: 
+		b, _:= ioutil.ReadAll(resp.Body)
+
+		var f interface{}
+		json.Unmarshal(b, &f)
+		log.WithField("response", string(b)).Debug("Response:")
+
+		attrs := f.(map[string]interface {})
+		log.WithField("len(attrs)", len(attrs)).Debug("Found some attributes")
+		for k, v := range attrs {
+			fmt.Printf("%s: %s\n", k, v)
+		}
+	} 	
+	// return feeds_sl	
 }
 
 func FeedsAction(c *cli.Context) {
@@ -107,7 +148,7 @@ func FeedsAction(c *cli.Context) {
 
 func Feeds(c *cli.Context) []string {
 	url := api_url_base + "/feeds"
-	log.Debug("GET", url)
+	log.Debug("GET ", url)
 
 	req, err := http.NewRequest("GET", url, nil)
 	req.Header.Set("x-aio-key", c.GlobalString("key"))
@@ -125,11 +166,11 @@ func Feeds(c *cli.Context) []string {
 		if err != nil {
 			log.WithField("error", err).Fatal("Error reading response body")
 		}
-		log.WithField("response", string(b)).Debug("Repsonse:")
+		log.WithField("response", string(b)).Debug("Response:")
 
 		var f interface{}
 		if json.Unmarshal(b, &f) != nil {
-			log.Fatal(err)
+			log.Fatal("Trouble with json.Unmarshal")
 		}
 		//log.WithField("refled.TypeOf(f)", reflect.TypeOf(f)).Debug()
 
