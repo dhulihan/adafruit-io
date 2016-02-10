@@ -1,15 +1,23 @@
 package main
 
 import (
-	"github.com/dhulihan/adafruit-io-go/aio"
 	"github.com/codegangsta/cli"
 	"os"
 	log "github.com/Sirupsen/logrus"
+	"net/http"
+	"io/ioutil"
+	"encoding/json"
+	// "reflect"
+	"fmt"
 )
 
 func init() {
 	log.SetLevel(log.InfoLevel)
 }
+
+var (
+	api_url_base = "https://io.adafruit.com/api"
+)
 
 func main() {
 	app := cli.NewApp()
@@ -23,25 +31,115 @@ func main() {
 		// 	Value: "true",
 		// 	Usage: "Enable to see debug messages",
 		// }
+		cli.StringFlag{
+			Name: "format, f",
+			Value: "text",
+			Usage: "Desired output format. Options: json, text (default)",
+		}, cli.StringFlag{
+			Name: "key, k",
+			Usage: "Your adafruit.io secret key. $AIO_KEY tried first",
+			EnvVar: "AIO_KEY",
+		},		
 		cli.BoolFlag{
 			Name:  "debug, d",
 			Usage: "Enable to see debug messages",
 		},
 	}
+	// app.Action = MainAction
+	app.Commands = []cli.Command {
+		{
+			Name:      "feeds",
+			Aliases:   []string{"f"},
+			Usage:     "Get Feeds",
+			Action:    FeedsAction,
+		},		
+		{
+			Name:      "key",
+			Aliases:   []string{"k"},
+			Usage:     "print AIO key",
+			Action:    KeyAction,
+		},
+	}	
+	Run(app)
+}
 
-	app.Action = func(c *cli.Context) {
-		if c.Bool("debug") {
+func Run(app *cli.App) {
+	app.Before = func(c *cli.Context) error {
+		if c.GlobalBool("debug") {
 			log.SetLevel(log.DebugLevel)
+			log.Debug("Debug Mode ON")		
 		}
-		log.Debug("Starting...")
-
-		if aio_key := aio.GetKey(); aio_key == "" {
-			log.Fatal(`$AIO_KEY not set. Try export AIO_KEY="KEY GOES HERE"`)
-		} else {
-			log.Debug("adafruit.io key found via $AIO_KEY\n")
-			feeds := aio.Feeds()
-			log.WithField("feeds", len(feeds)).Debug("Found feeds")
-		}
+		return nil
 	}
 	app.Run(os.Args)
+}
+
+func MainAction(c *cli.Context) {
+	log.Debug("Starting...")
+	log.Debug("using adafruit.io key ", c.String("key"))
+	log.Debug("Args: ", c.Args())
+
+	if len(c.Args()) == 0 {
+		log.Debug("No action specified")
+		fmt.Println("Please provide a subcommand. Run --help for more. ")
+	}
+}
+
+func KeyAction(c *cli.Context) {
+	fmt.Println(c.String("key"))
+}
+
+func FeedsAction(c *cli.Context) {
+	feeds := Feeds(c)
+	if len(feeds) > 0 {
+		for _, feed := range feeds  {
+			fmt.Println(feed)
+		}	
+		 
+	} else {
+		fmt.Println("No feeds found.")
+	}	
+}
+
+func Feeds(c *cli.Context) []string {
+	url := api_url_base + "/feeds"
+	log.Debug("GET", url)
+
+	req, err := http.NewRequest("GET", url, nil)
+	req.Header.Set("x-aio-key", c.GlobalString("key"))
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	var feeds_sl []string
+
+	// response, err := http.Get(url)
+	if err != nil {
+		log.WithField("error", err).Fatal("Reponse error")
+	} else {
+		// close Body after everything is done
+		defer resp.Body.Close()
+		b, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.WithField("error", err).Fatal("Error reading response body")
+		}
+		log.WithField("response", string(b)).Debug("Repsonse:")
+
+		var f interface{}
+		if json.Unmarshal(b, &f) != nil {
+			log.Fatal(err)
+		}
+		//log.WithField("refled.TypeOf(f)", reflect.TypeOf(f)).Debug()
+
+		// someone call Tom Hanks, we gunna cast away
+		feeds := f.([]interface {})
+		log.WithField("feeds", len(feeds)).Debug("Found feeds")
+		for _, feed_iface := range feeds {
+			feed := feed_iface.(map[string]interface{})
+			feeds_sl = append(feeds_sl, feed["name"].(string))
+			log.WithField("feed", feed["name"]).Debug("Found Feed")
+			// for attr := range feed {
+			// 	log.WithField(attr, feed[attr]).Debug("Attr")
+			// } 
+		} 
+	}		
+	return feeds_sl
 }
