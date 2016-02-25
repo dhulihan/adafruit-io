@@ -1,5 +1,19 @@
+init_tasks:
+ - command: "make"
+   nowait: true
+
 watchers:
+ - extension: Makefile
+   tasks:
+   - command: "make"
+     nowait: true
+
  - extension: go
    tasks:
-   - command: "make test"
+   - command: "make test-send"
+     nowait: true
+
+ - extension: bats
+   tasks:
+   - command: "make bats"
      nowait: true
