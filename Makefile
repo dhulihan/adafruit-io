@@ -1,6 +1,5 @@
 MAIN=adafruit-io
-#VAL=$(echo $RANDOM | head -c 3)
-VAL?=10
+VAL:=$(shell echo $$RANDOM | head -c 3)
 OPTS=-d
 all: clean build test
 
@@ -8,17 +7,25 @@ build:
 	@echo "+ $@"
 	@go build -v 
 
-test: build
+test:
 	@echo "+ $@"
-	./$(MAIN) -d
-	#./$(MAIN) -d feeds
-	# ./$(MAIN) -d info foo
-	#./$(MAIN) -d get foo
-	#./$(MAIN) $(OPTS) send foo $(VAL)
+	go test ./...
+
+test-send: build
+	@echo "+ $@"
+	./adafruit-io -d send foo $(VAL)
+
+bats: build
+	@echo "+ $@"
+	bats *.bats
 
 clean:
 	@echo "+ $@"
 	@rm $(MAIN)
+
+env:
+	@echo "+ $@"
+	@echo $(VAL) 
 
 watch:
 	    (while true; do make build.log; sleep 2; done) | grep -v 'make\[1\]'
