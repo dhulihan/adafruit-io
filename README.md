@@ -1,7 +1,19 @@
 A cli tool for [adafruit.io](https://adafruit.io) written in go.
 
-	go get github.com/dhulihan/adafruit-io
-	adafruit-io send my-feed 98.6
+```sh
+$ go get github.com/dhulihan/adafruit-io
+
+$ adafruit-io feeds
+Foo
+Bar
+...
+
+$ adafruit-io get foo
+98.6
+
+$ adafruit-io send my-feed 98.6
+OK 98.7 	
+```
 
 ### Providing your key
 
