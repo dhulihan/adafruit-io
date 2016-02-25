@@ -25,12 +25,12 @@ type Feed struct {
 }
 
 // Get slice of feeds
-func Feeds(aio_key string) []Feed {
+func Feeds(a *Context) []Feed {
 	url := API_URL_BASE + "/feeds"
 	log.Debug("GET ", url)
 
 	req, err := http.NewRequest("GET", url, nil)
-	req.Header.Set("x-aio-key", aio_key)
+	req.Header.Set("x-aio-key", a.api_key)
 	client := &http.Client{}
 	resp, err := client.Do(req)
 

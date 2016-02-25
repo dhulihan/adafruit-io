@@ -1,7 +1,5 @@
 A cli tool for [adafruit.io](https://adafruit.io) written in go.
 
-## UNSTABLE, CHECK BACK LATER
-
 ## Installation
 
 	go get github.com/dhulihan/adafruit-io
@@ -28,12 +26,23 @@ To set it permanently, add this to `~/.bashrc|.zshrc`
 
 Get all feeds
 
-	adafruit-io
+	adafruit-io feeds
+	# Foo
+	# Bar
+	# ...
 
 Get latest value of a feed
 
-	adafruit-io foo
+	adafruit-io get foo
+	# 98.6
 
-Send a value to a feed
+Send a value to a feed (returns `OK [val]` if request is successful)
 
-	adafruit-io foo 9.7	
+	adafruit-io send foo 98.7
+	# OK 98.7 	
+
+### Options
+
+* `-d` - Debug mode
+* `-v` - Version 
+* `-k [API_KEY]` - Specify API key via. The envvar `$AIO_KEY` is tried before this.

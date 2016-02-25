@@ -22,11 +22,7 @@ func main() {
 	app.Version = "1.0.0"
 	app.Usage = "Send data to your adafruit.io dashboard"
 	app.Flags = []cli.Flag{
-		// cli.StringFlag{
-		// 	Name: "verbose",
-		// 	Value: "true",
-		// 	Usage: "Enable to see debug messages",
-		// }
+
 		cli.StringFlag{
 			Name:  "format, f",
 			Value: "text",
@@ -41,18 +37,17 @@ func main() {
 			Usage: "Enable to see debug messages",
 		},
 	}
-	app.Action = MainAction
+	// app.Action = MainAction
 	app.Commands = []cli.Command{
 		{
-			Name:        "info",
-			Aliases:     []string{"i"},
-			Usage:       "Get feed info",
-			Description: "info <FEED ID|FEED NAME|FEED KEY>",
-			Action:      InfoAction,
+			Name:    "feeds",
+			Aliases: []string{"f"},
+			Usage:   "Get a list of all feeds",
+			Action:  FeedsAction,
 		},
 		{
 			Name:        "get",
-			Aliases:     []string{"f"},
+			Aliases:     []string{"g"},
 			Usage:       "Get feeds last value",
 			Description: "get <FEED ID|FEED NAME|FEED KEY>",
 			Action:      GetAction,
@@ -60,7 +55,7 @@ func main() {
 		{
 			Name:        "send",
 			Aliases:     []string{"s"},
-			Usage:       "Send a value to a feed",
+			Usage:       "Update a feed's last_value",
 			Description: "send <FEED ID|FEED NAME|FEED KEY> <VALUE>",
 			Action:      SendAction,
 		},
@@ -94,7 +89,15 @@ func MainAction(c *cli.Context) {
 	log.Debug("using adafruit.io key ", c.GlobalString("key"))
 	log.Debug("Args: ", c.Args())
 
-	feeds := aio.Feeds(c.GlobalString("key"))
+	if len(c.Args()) == 0 {
+		log.Debug("No action specified")
+		fmt.Println("Please provide a subcommand. Run --help for some examples.")
+	}
+}
+
+func FeedsAction(c *cli.Context) {
+	a := aio.NewContext(c.GlobalString("key"))
+	feeds := aio.Feeds(&a)
 	if len(feeds) > 0 {
 		for _, feed := range feeds {
 			fmt.Println(feed.Name)
@@ -102,11 +105,6 @@ func MainAction(c *cli.Context) {
 
 	} else {
 		fmt.Println("No feeds found.")
-	}
-
-	if len(c.Args()) == 0 {
-		log.Debug("No action specified")
-		fmt.Println("Please provide a subcommand. Run --help for some examples.")
 	}
 }
 
