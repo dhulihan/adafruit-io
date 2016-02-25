@@ -3,7 +3,7 @@ package main
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
-	"github.com/dhulihan/adafruit-io/feed"
+	"github.com/dhulihan/adafruit-io/aio"
 	"os"
 	// "reflect"
 	"fmt"
@@ -14,6 +14,9 @@ func init() {
 }
 
 func main() {
+	// a := aio.NewContext()
+	// fmt.Printf("%+v\n", a)
+
 	app := cli.NewApp()
 	app.Name = "adafruit-io"
 	app.Version = "1.0.0"
@@ -91,7 +94,7 @@ func MainAction(c *cli.Context) {
 	log.Debug("using adafruit.io key ", c.GlobalString("key"))
 	log.Debug("Args: ", c.Args())
 
-	feeds := feed.Feeds(c.GlobalString("key"))
+	feeds := aio.Feeds(c.GlobalString("key"))
 	if len(feeds) > 0 {
 		for _, feed := range feeds {
 			fmt.Println(feed.Name)
@@ -131,10 +134,15 @@ func GetAction(c *cli.Context) {
 	if len(c.Args()) == 0 {
 		log.Fatal("feed id missing")
 	}
+
+	a := aio.NewContext(c.GlobalString("key"))
 	id := c.Args().First()
-	feed := FetchFeed(c, id)
-	last_value, ok := feed["last_value"].(string)
-	if ok {
+	feed, err := aio.Find(id, &a)
+	if err != nil {
+		log.Fatal(err)
+	}
+	last_value := feed.Last_Value
+	if last_value != "" {
 		fmt.Println(last_value)
 	} else {
 		log.Fatal("last_value not set")
@@ -147,6 +155,19 @@ func SendAction(c *cli.Context) {
 		log.Fatal("feed id missing")
 	}
 
+	if len(c.Args()) == 1 {
+		log.Fatal("value is missing")
+	}
+
+	a := aio.NewContext(c.GlobalString("key"))
+	id := c.Args().First()
+	val := c.Args()[len(c.Args())-1]
+	err := aio.Send(id, val, &a)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println("OK", val)
+	}
 }
 
 func FeedInfo(c *cli.Context, id string) map[string]interface{} {

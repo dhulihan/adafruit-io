@@ -28,7 +28,7 @@ To set it permanently, add this to `~/.bashrc|.zshrc`
 
 Get all feeds
 
-	adafruit-io feeds
+	adafruit-io
 
 Get latest value of a feed
 

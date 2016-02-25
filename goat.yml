@@ -10,7 +10,7 @@ watchers:
 
  - extension: go
    tasks:
-   - command: "make test-send"
+   - command: "make test"
      nowait: true
 
  - extension: bats
