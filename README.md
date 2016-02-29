@@ -1,18 +1,7 @@
 A cli tool for [adafruit.io](https://adafruit.io) written in go.
 
-```zsh
-$ go get github.com/dhulihan/adafruit-io
-
-$ adafruit-io feeds
-Foo
-Bar
-...
-
-$ adafruit-io get foo
-98.6
-
-$ adafruit-io send my-feed 98.6
-OK 98.7 	
+```sh
+go get github.com/dhulihan/adafruit-io
 ```
 
 ### Providing your key
@@ -37,20 +26,26 @@ To set it permanently, add this to `~/.bashrc|.zshrc`
 
 Get all feeds
 
-	adafruit-io feeds
-	# Foo
-	# Bar
-	# ...
+```sh
+adafruit-io feeds
+# Foo
+# Bar
+# ...
+```
 
 Get latest value of a feed
 
-	adafruit-io get foo
-	# 98.6
+```sh
+adafruit-io get foo
+# 98.6
+```
 
 Send a value to a feed (returns `OK [val]` if request is successful)
 
-	adafruit-io send foo 98.7
-	# OK 98.7 	
+```sh
+adafruit-io send foo 98.7
+# OK 98.7 	
+```
 
 ### Options
 
