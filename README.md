@@ -1,6 +1,6 @@
 A cli tool for [adafruit.io](https://adafruit.io) written in go.
 
-```sh
+```bash
 $ go get github.com/dhulihan/adafruit-io
 
 $ adafruit-io feeds

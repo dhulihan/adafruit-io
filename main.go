@@ -1,12 +1,11 @@
 package main
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 	"github.com/dhulihan/adafruit-io/aio"
 	"os"
-	// "reflect"
-	"fmt"
 )
 
 func init() {
@@ -14,9 +13,6 @@ func init() {
 }
 
 func main() {
-	// a := aio.NewContext()
-	// fmt.Printf("%+v\n", a)
-
 	app := cli.NewApp()
 	app.Name = "adafruit-io"
 	app.Version = "1.0.0"
@@ -37,7 +33,6 @@ func main() {
 			Usage: "Enable to see debug messages",
 		},
 	}
-	// app.Action = MainAction
 	app.Commands = []cli.Command{
 		{
 			Name:    "feeds",
@@ -82,17 +77,6 @@ func Run(app *cli.App) {
 		return nil
 	}
 	app.Run(os.Args)
-}
-
-func MainAction(c *cli.Context) {
-	log.Debug("Starting...")
-	log.Debug("using adafruit.io key ", c.GlobalString("key"))
-	log.Debug("Args: ", c.Args())
-
-	if len(c.Args()) == 0 {
-		log.Debug("No action specified")
-		fmt.Println("Please provide a subcommand. Run --help for some examples.")
-	}
 }
 
 func FeedsAction(c *cli.Context) {
