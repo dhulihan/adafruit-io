@@ -1,10 +1,12 @@
 A cli tool for [adafruit.io](https://adafruit.io) written in go.
 
+## Setup
+
 ```sh
 go get github.com/dhulihan/adafruit-io
 ```
 
-### Providing your key
+#### Provide your adafruit.io API key
 
 `adafruit-go` requires your secret AIO key. 
 
