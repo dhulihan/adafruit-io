@@ -25,7 +25,7 @@ type Feed struct {
 }
 
 // Get slice of feeds
-func Feeds(a *Context) []Feed {
+func Feeds(a *Context) ([]Feed, error) {
 	url := API_URL_BASE + "/feeds"
 	log.Debug("GET ", url)
 
@@ -33,27 +33,28 @@ func Feeds(a *Context) []Feed {
 	req.Header.Set("x-aio-key", a.api_key)
 	client := &http.Client{}
 	resp, err := client.Do(req)
+	var feeds []Feed
 
 	if err != nil {
 		log.WithField("error", err).Fatal("Reponse error")
+		return feeds, err
 	} else {
 		// close Body after everything is done
 		defer resp.Body.Close()
 		b, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.WithField("error", err).Fatal("Error reading response body")
+			return feeds, err
 		}
 		log.WithField("response", string(b)).Debug("Response:")
-		var feeds []Feed
 		err = json.Unmarshal(b, &feeds)
 		if err != nil {
 			log.Fatal("Could not unmarshal:", err)
-			return nil
+			return feeds, err
 		}
 		log.WithField("feeds", feeds).Debug("Found feeds")
-		return feeds
+		return feeds, nil
 	}
-	return nil
 }
 
 func Find(id string, a *Context) (Feed, error) {

@@ -81,7 +81,11 @@ func Run(app *cli.App) {
 
 func FeedsAction(c *cli.Context) {
 	a := aio.NewContext(c.GlobalString("key"))
-	feeds := aio.Feeds(&a)
+	feeds, err := aio.Feeds(&a)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	if len(feeds) > 0 {
 		for _, feed := range feeds {
 			fmt.Println(feed.Name)
