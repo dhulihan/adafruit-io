@@ -53,4 +53,4 @@ adafruit-io send foo 98.7
 
 * `-d` - Debug mode
 * `-v` - Version 
-* `-k [API_KEY]` - Specify API key via. The envvar `$AIO_KEY` is tried before this.
+* `-k [API_KEY]` - Specify API key. The envvar `$AIO_KEY` is tried before this.

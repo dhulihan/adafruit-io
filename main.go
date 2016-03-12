@@ -73,6 +73,7 @@ func Run(app *cli.App) {
 		if c.GlobalBool("debug") {
 			log.SetLevel(log.DebugLevel)
 			log.Debug("Debug Mode ON")
+			log.Debug("AIO_KEY: ", c.GlobalString("key"))
 		}
 		return nil
 	}
@@ -97,7 +98,7 @@ func FeedsAction(c *cli.Context) {
 }
 
 func KeyAction(c *cli.Context) {
-	fmt.Println(c.String("key"))
+	fmt.Println(c.GlobalString("key"))
 }
 
 func InfoAction(c *cli.Context) {
